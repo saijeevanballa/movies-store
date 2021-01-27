@@ -1,5 +1,5 @@
 import React from "react";
 
 export default function Rentals() {
-	return <h1>Rentals</h1>;
+  return <h1>Rentals</h1>;
 }
