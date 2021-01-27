@@ -1,6 +1,6 @@
 import axios from "axios";
 const baseUrl =
-  "https://routelldvf5ez-saijeevanballa-che.8a09.starter-us-east-2.openshiftapps.com";
+  "https://routexhn2mp95-saijeevanballa-che.8a09.starter-us-east-2.openshiftapps.com";
 
 export default {
   get: axios.get,

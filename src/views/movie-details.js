@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import * as yup from "yup";
 import { useFormik } from "formik";
-import { getMovie, saveMovie } from "../services/fakeMovieService";
-import { genres } from "../services/fakeGenreService";
+import { getMovie, saveMovie } from "../services/movieService";
+import { getGenres } from "../services/genreService";
 
 export default function Movie({ match, history }) {
   const defaultMovie = {
@@ -12,6 +12,7 @@ export default function Movie({ match, history }) {
     dailyRentalRate: 0,
   };
   let [movie, setMovie] = useState(defaultMovie);
+  let [genre, setGenre] = useState([]);
 
   let validationSchema = yup.object({
     title: yup.string().required(),
@@ -22,9 +23,9 @@ export default function Movie({ match, history }) {
   const state = useFormik({
     initialValues: movie,
     validationSchema,
-    onSubmit: (value) => {
+    onSubmit: async (value) => {
       console.log(value);
-      saveMovie({
+      await saveMovie({
         ...value,
         name: value.title,
         genreId: (value.genre && value.genre._id) || value.genre,
@@ -35,13 +36,24 @@ export default function Movie({ match, history }) {
   });
 
   useEffect(() => {
-    let movie = getMovie(match.params.id);
-    console.log(movie, match.params.id);
-    if (!movie && match.params.id !== "new") {
+    (async () => {
+      let { data: genre } = await getGenres();
+      setGenre(genre);
+    })();
+    if (match.params.id == "new") return;
+    try {
+      (async () => {
+        let { data: movie } = await getMovie(match.params.id);
+        console.log(movie, match.params.id);
+        if (!movie && match.params.id !== "new") {
+          history.replace("/notfound");
+        }
+        if (movie) {
+          setMovie(movie);
+        }
+      })();
+    } catch (error) {
       history.replace("/notfound");
-    }
-    if (movie) {
-      setMovie(movie);
     }
   }, []);
 
@@ -76,7 +88,7 @@ export default function Movie({ match, history }) {
             defaultValue={state.values.genre._id}
             onChange={state.handleChange}
           >
-            {genres.map((o) => (
+            {genre.map((o) => (
               <option key={o._id} value={o._id}>
                 {o.name}
               </option>
